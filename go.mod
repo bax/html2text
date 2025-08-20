@@ -6,7 +6,6 @@ require (
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf
 	golang.org/x/net v0.43.0
-	jaytaylor.com/html2text v0.0.0-20230321000545-74c2419ad056
 )
 
 require (
