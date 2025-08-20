@@ -163,27 +163,27 @@ func TestTables(t *testing.T) {
 		{
 			"<table><tr><td></td><td></td></tr></table>",
 			// Empty table
-			// +--+--+
-			// |  |  |
-			// +--+--+
-			"+--+--+\n|  |  |\n+--+--+",
+			// ┌──┬──┐
+			// │  │  │
+			// └──┴──┘
+			"┌──┬──┐\n│  │  │\n└──┴──┘",
 			"",
 		},
 		{
 			"<table><tr><td>cell1</td><td>cell2</td></tr></table>",
-			// +-------+-------+
-			// | cell1 | cell2 |
-			// +-------+-------+
-			"+-------+-------+\n| cell1 | cell2 |\n+-------+-------+",
+			// ┌───────┬───────┐
+			// │ cell1 │ cell2 │
+			// └───────┴───────┘
+			"┌───────┬───────┐\n│ cell1 │ cell2 │\n└───────┴───────┘",
 			"cell1 cell2",
 		},
 		{
 			"<table><tr><td>row1</td></tr><tr><td>row2</td></tr></table>",
-			// +------+
-			// | row1 |
-			// | row2 |
-			// +------+
-			"+------+\n| row1 |\n| row2 |\n+------+",
+			// ┌──────┐
+			// │ row1 │
+			// │ row2 │
+			// └──────┘
+			"┌──────┐\n│ row1 │\n│ row2 │\n└──────┘",
 			"row1 row2",
 		},
 		{
@@ -193,16 +193,16 @@ func TestTables(t *testing.T) {
 					<tr><td>Row-2-Col-1</td><td>Row-2-Col-2</td></tr>
 				</tbody>
 			</table>`,
-			// +--------------------------------+-------------+
-			// | Row-1-Col-1-Msg123456789012345 | Row-1-Col-2 |
-			// | Row-1-Col-1-Msg2               |             |
-			// | Row-2-Col-1                    | Row-2-Col-2 |
-			// +--------------------------------+-------------+
-			`+--------------------------------+-------------+
-| Row-1-Col-1-Msg123456789012345 | Row-1-Col-2 |
-| Row-1-Col-1-Msg2               |             |
-| Row-2-Col-1                    | Row-2-Col-2 |
-+--------------------------------+-------------+`,
+			// ┌────────────────────────────────┬─────────────┐
+			// │ Row-1-Col-1-Msg123456789012345 │ Row-1-Col-2 │
+			// │ Row-1-Col-1-Msg2               │             │
+			// │ Row-2-Col-1                    │ Row-2-Col-2 │
+			// └────────────────────────────────┴─────────────┘
+			`┌────────────────────────────────┬─────────────┐
+│ Row-1-Col-1-Msg123456789012345 │ Row-1-Col-2 │
+│ Row-1-Col-1-Msg2               │             │
+│ Row-2-Col-1                    │ Row-2-Col-2 │
+└────────────────────────────────┴─────────────┘`,
 			`Row-1-Col-1-Msg123456789012345
 
 Row-1-Col-1-Msg2
@@ -214,11 +214,11 @@ Row-1-Col-2 Row-2-Col-1 Row-2-Col-2`,
 			   <tr><td>cell1-1</td><td>cell1-2</td></tr>
 			   <tr><td>cell2-1</td><td>cell2-2</td></tr>
 			</table>`,
-			// +---------+---------+
-			// | cell1-1 | cell1-2 |
-			// | cell2-1 | cell2-2 |
-			// +---------+---------+
-			"+---------+---------+\n| cell1-1 | cell1-2 |\n| cell2-1 | cell2-2 |\n+---------+---------+",
+			// ┌─────────┬─────────┐
+			// │ cell1-1 │ cell1-2 │
+			// │ cell2-1 │ cell2-2 │
+			// └─────────┴─────────┘
+			"┌─────────┬─────────┐\n│ cell1-1 │ cell1-2 │\n│ cell2-1 │ cell2-2 │\n└─────────┴─────────┘",
 			"cell1-1 cell1-2 cell2-1 cell2-2",
 		},
 		{
@@ -234,14 +234,14 @@ Row-1-Col-2 Row-2-Col-1 Row-2-Col-2`,
 					<tr><td>Row 2 Col 1</td><td>Row 2 Col 2</td></tr>
 				</tbody>
 			</table>`,
-			`+-------------+-------------+
-|  HEADER 1   |  HEADER 2   |
-+-------------+-------------+
-| Row 1 Col 1 | Row 1 Col 2 |
-| Row 2 Col 1 | Row 2 Col 2 |
-+-------------+-------------+
-|  FOOTER 1   |  FOOTER 2   |
-+-------------+-------------+`,
+			`┌─────────────┬─────────────┐
+│  HEADER 1   │  HEADER 2   │
+├─────────────┼─────────────┤
+│ Row 1 Col 1 │ Row 1 Col 2 │
+│ Row 2 Col 1 │ Row 2 Col 2 │
+├─────────────┼─────────────┤
+│  FOOTER 1   │  FOOTER 2   │
+└─────────────┴─────────────┘`,
 			"Header 1 Header 2 Footer 1 Footer 2 Row 1 Col 1 Row 1 Col 2 Row 2 Col 1 Row 2 Col 2",
 		},
 		// Two tables in same HTML (goal is to test that context is
@@ -273,30 +273,30 @@ Row-1-Col-2 Row-2-Col-1 Row-2-Col-2`,
 					</tbody>
 				</table>
 			</p>`,
-			`+---------------------+---------------------+
-|  TABLE 1 HEADER 1   |  TABLE 1 HEADER 2   |
-+---------------------+---------------------+
-| Table 1 Row 1 Col 1 | Table 1 Row 1 Col 2 |
-| Table 1 Row 2 Col 1 | Table 1 Row 2 Col 2 |
-+---------------------+---------------------+
-|  TABLE 1 FOOTER 1   |  TABLE 1 FOOTER 2   |
-+---------------------+---------------------+
+			`┌─────────────────────┬─────────────────────┐
+│  TABLE 1 HEADER 1   │  TABLE 1 HEADER 2   │
+├─────────────────────┼─────────────────────┤
+│ Table 1 Row 1 Col 1 │ Table 1 Row 1 Col 2 │
+│ Table 1 Row 2 Col 1 │ Table 1 Row 2 Col 2 │
+├─────────────────────┼─────────────────────┤
+│  TABLE 1 FOOTER 1   │  TABLE 1 FOOTER 2   │
+└─────────────────────┴─────────────────────┘
 
-+---------------------+---------------------+
-|  TABLE 2 HEADER 1   |  TABLE 2 HEADER 2   |
-+---------------------+---------------------+
-| Table 2 Row 1 Col 1 | Table 2 Row 1 Col 2 |
-| Table 2 Row 2 Col 1 | Table 2 Row 2 Col 2 |
-+---------------------+---------------------+
-|  TABLE 2 FOOTER 1   |  TABLE 2 FOOTER 2   |
-+---------------------+---------------------+`,
+┌─────────────────────┬─────────────────────┐
+│  TABLE 2 HEADER 1   │  TABLE 2 HEADER 2   │
+├─────────────────────┼─────────────────────┤
+│ Table 2 Row 1 Col 1 │ Table 2 Row 1 Col 2 │
+│ Table 2 Row 2 Col 1 │ Table 2 Row 2 Col 2 │
+├─────────────────────┼─────────────────────┤
+│  TABLE 2 FOOTER 1   │  TABLE 2 FOOTER 2   │
+└─────────────────────┴─────────────────────┘`,
 			`Table 1 Header 1 Table 1 Header 2 Table 1 Footer 1 Table 1 Footer 2 Table 1 Row 1 Col 1 Table 1 Row 1 Col 2 Table 1 Row 2 Col 1 Table 1 Row 2 Col 2
 
 Table 2 Header 1 Table 2 Header 2 Table 2 Footer 1 Table 2 Footer 2 Table 2 Row 1 Col 1 Table 2 Row 1 Col 2 Table 2 Row 2 Col 1 Table 2 Row 2 Col 2`,
 		},
 		{
 			"_<table><tr><td>cell</td></tr></table>_",
-			"_\n\n+------+\n| cell |\n+------+\n\n_",
+			"_\n\n┌──────┐\n│ cell │\n└──────┘\n\n_",
 			"_\n\ncell\n\n_",
 		},
 		{
@@ -317,17 +317,18 @@ Table 2 Header 1 Table 2 Header 2 Table 2 Footer 1 Table 2 Footer 2 Table 2 Row 
 					<td>$1.99</td>
 				</tr>
 			</table>`,
-			`+--------+--------------------------------+--------+
-|  ITEM  |          DESCRIPTION           | PRICE  |
-+--------+--------------------------------+--------+
-| Golang | Open source programming        | $10.99 |
-|        | language that makes it easy    |        |
-|        | to build simple, reliable, and |        |
-|        | efficient software             |        |
-| Hermes | Programmatically create        | $1.99  |
-|        | beautiful e-mails using        |        |
-|        | Golang.                        |        |
-+--------+--------------------------------+--------+`,
+			`┌────────┬─────────────────────────┬────────┐
+│  ITEM  │       DESCRIPTION       │ PRICE  │
+├────────┼─────────────────────────┼────────┤
+│ Golang │ Open source programming │ $10.99 │
+│        │ language that makes it  │        │
+│        │ easy to build simple,   │        │
+│        │ reliable, and efficient │        │
+│        │ software                │        │
+│ Hermes │ Programmatically create │ $1.99  │
+│        │ beautiful e-mails using │        │
+│        │ Golang.                 │        │
+└────────┴─────────────────────────┴────────┘`,
 			"Item Description Price Golang Open source programming language that makes it easy to build simple, reliable, and efficient software $10.99 Hermes Programmatically create beautiful e-mails using Golang. $1.99",
 		},
 	}
@@ -1000,7 +1001,7 @@ func Example() {
 	</body>
 </html>`
 
-	text, err := FromString(inputHTML, Options{PrettyTables: true})
+	text, err := FromString(inputHTML, Options{PrettyTables: true, PrettyTablesOptions: NewPrettyTablesOptions()})
 	if err != nil {
 		panic(err)
 	}
@@ -1019,12 +1020,45 @@ func Example() {
 	// * Link 2: Example2.com ( https://example2.com )
 	// * Something else
 	//
-	// +-------------+-------------+
-	// |  HEADER 1   |  HEADER 2   |
-	// +-------------+-------------+
-	// | Row 1 Col 1 | Row 1 Col 2 |
-	// | Row 2 Col 1 | Row 2 Col 2 |
-	// +-------------+-------------+
-	// |  FOOTER 1   |  FOOTER 2   |
-	// +-------------+-------------+
+	// ┌─────────────┬─────────────┐
+	// │  HEADER 1   │  HEADER 2   │
+	// ├─────────────┼─────────────┤
+	// │ Row 1 Col 1 │ Row 1 Col 2 │
+	// │ Row 2 Col 1 │ Row 2 Col 2 │
+	// ├─────────────┼─────────────┤
+	// │  FOOTER 1   │  FOOTER 2   │
+	// └─────────────┴─────────────┘
 }
+
+//func TestCutLastChar(t *testing.T) {
+//	inputHTML := `<table>
+//				<tr>
+//					<th>Item</th>
+//					<th>Description</th>
+//					<th>Price</th>
+//				</tr>
+//				<tr>
+//					<td>Golang</td>
+//					<td>Open source programming language that makes it easy to build simple, reliable, and efficient software</td>
+//					<td>$10.99</td>
+//				</tr>
+//				<tr>
+//					<td>Hermes</td>
+//					<td>Programmatically create beautiful e-mails using Golang.</td>
+//					<td>$1.99</td>
+//				</tr>
+//			</table>`
+//
+//	text, err := FromString(inputHTML, Options{
+//		PrettyTables: true,
+//		PrettyTablesOptions: &PrettyTablesOptions{
+//			AutoFormatHeader: true,
+//			//ColWidth:         70,
+//			MaxWidth: 80,
+//		},
+//	})
+//	if err != nil {
+//		panic(err)
+//	}
+//	t.Log(text)
+//}

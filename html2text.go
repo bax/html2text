@@ -3,11 +3,15 @@ package html2text
 import (
 	"bytes"
 	"io"
+	"os"
 	"regexp"
 	"strings"
 	"unicode"
 
-	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/ll"
+	"github.com/olekukonko/ll/lh"
+	. "github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/ssor/bom"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -23,43 +27,45 @@ type Options struct {
 
 // PrettyTablesOptions overrides tablewriter behaviors
 type PrettyTablesOptions struct {
-	AutoFormatHeader     bool
-	AutoWrapText         bool
-	ReflowDuringAutoWrap bool
-	ColWidth             int
-	ColumnSeparator      string
-	RowSeparator         string
-	CenterSeparator      string
-	HeaderAlignment      int
-	FooterAlignment      int
-	Alignment            int
-	ColumnAlignment      []int
-	NewLine              string
-	HeaderLine           bool
-	RowLine              bool
-	AutoMergeCells       bool
-	Borders              tablewriter.Border
+	AutoFormatHeader bool
+	//AutoWrapText         int // e.g. tw.WrapNone
+	////ReflowDuringAutoWrap bool
+	//ColWidth int
+	MaxWidth int
+	////ColumnSeparator      string
+	////RowSeparator         string
+	////CenterSeparator      string
+	////NewLine              string
+	//HeaderAlignment tw.Align
+	//FooterAlignment tw.Align
+	//Alignment       tw.Alignment
+	//ColumnAlignment []tw.Align
+	//HeaderLine      bool
+	//RowLine         bool
+	//AutoMergeCells  bool
+	//Borders         tw.Border
 }
 
 // NewPrettyTablesOptions creates PrettyTablesOptions with default settings
 func NewPrettyTablesOptions() *PrettyTablesOptions {
 	return &PrettyTablesOptions{
-		AutoFormatHeader:     true,
-		AutoWrapText:         true,
-		ReflowDuringAutoWrap: true,
-		ColWidth:             tablewriter.MAX_ROW_WIDTH,
-		ColumnSeparator:      tablewriter.COLUMN,
-		RowSeparator:         tablewriter.ROW,
-		CenterSeparator:      tablewriter.CENTER,
-		HeaderAlignment:      tablewriter.ALIGN_DEFAULT,
-		FooterAlignment:      tablewriter.ALIGN_DEFAULT,
-		Alignment:            tablewriter.ALIGN_DEFAULT,
-		ColumnAlignment:      []int{},
-		NewLine:              tablewriter.NEWLINE,
-		HeaderLine:           true,
-		RowLine:              false,
-		AutoMergeCells:       false,
-		Borders:              tablewriter.Border{Left: true, Right: true, Bottom: true, Top: true},
+		AutoFormatHeader: true,
+		//AutoWrapText:         true,
+		////ReflowDuringAutoWrap: true,
+		//ColWidth: 70,
+		MaxWidth: 80,
+		////ColumnSeparator:      tablewriter.COLUMN,
+		////RowSeparator:         tablewriter.ROW,
+		////CenterSeparator:      tablewriter.CENTER,
+		////NewLine:              tablewriter.NEWLINE,
+		//HeaderAlignment: tw.AlignCenter,
+		//FooterAlignment: tw.AlignCenter,
+		//Alignment:       tw.AlignCenter,
+		//ColumnAlignment: []tw.Align{},
+		//HeaderLine:      true,
+		//RowLine:         false,
+		//AutoMergeCells:  false,
+		//Borders:         tw.Border{Left: tw.On, Right: tw.On, Bottom: tw.On, Top: tw.On},
 	}
 }
 
@@ -332,32 +338,60 @@ func (ctx *textifyTraverseContext) handleTableElement(node *html.Node) error {
 		}
 
 		buf := &bytes.Buffer{}
-		table := tablewriter.NewWriter(buf)
+		table := NewWriter(buf)
+		//table.Options(WithDebug(true))
 		if ctx.options.PrettyTablesOptions != nil {
 			options := ctx.options.PrettyTablesOptions
-			table.SetAutoFormatHeaders(options.AutoFormatHeader)
-			table.SetAutoWrapText(options.AutoWrapText)
-			table.SetReflowDuringAutoWrap(options.ReflowDuringAutoWrap)
-			table.SetColWidth(options.ColWidth)
-			table.SetColumnSeparator(options.ColumnSeparator)
-			table.SetRowSeparator(options.RowSeparator)
-			table.SetCenterSeparator(options.CenterSeparator)
-			table.SetHeaderAlignment(options.HeaderAlignment)
-			table.SetFooterAlignment(options.FooterAlignment)
-			table.SetAlignment(options.Alignment)
-			table.SetColumnAlignment(options.ColumnAlignment)
-			table.SetNewLine(options.NewLine)
-			table.SetHeaderLine(options.HeaderLine)
-			table.SetRowLine(options.RowLine)
-			table.SetAutoMergeCells(options.AutoMergeCells)
-			table.SetBorders(options.Borders)
+			autoFormat := tw.State(tw.Fail)
+			if options.AutoFormatHeader {
+				autoFormat = tw.Success
+			}
+			table.Options(
+				WithLogger(ll.New("table").Handler(lh.NewTextHandler(os.Stdout))),
+				WithHeaderAutoFormat(autoFormat),
+				WithFooterAutoFormat(autoFormat),
+				WithFooterAlignmentConfig(tw.CellAlignment{Global: tw.AlignCenter}),
+				WithHeaderAlignmentConfig(tw.CellAlignment{Global: tw.AlignCenter}),
+				WithPadding(tw.Padding{
+					Left:      tw.Space,
+					Right:     tw.Space,
+					Top:       tw.Empty,
+					Bottom:    tw.Empty,
+					Overwrite: true,
+				}),
+
+				//			table.SetReflowDuringAutoWrap(options.ReflowDuringAutoWrap)
+				//WithRowMaxWidth(options.ColWidth),
+				//WithColumnMax(options.ColWidth),
+				WithMaxWidth(options.MaxWidth),
+				WithRowAutoWrap(tw.WrapNormal),
+
+				//			//table.SetColumnSeparator(options.ColumnSeparator)
+				//			//table.SetRowSeparator(options.RowSeparator)
+				//			//table.SetCenterSeparator(options.CenterSeparator)
+				//			WithHeaderAlignment(options.HeaderAlignment),
+				//			WithFooterAlignmentConfig(options.FooterAlignment),
+				//			WithAlignment(options.Alignment),
+				//			table.SetColumnAlignment(options.ColumnAlignment)
+				//			table.SetNewLine(options.NewLine)
+				//			table.SetHeaderLine(options.HeaderLine)
+				//			table.SetRowLine(options.RowLine)
+				//			table.SetAutoMergeCells(options.AutoMergeCells)
+				//			table.SetBorders(options.Borders)
+			)
 		}
-		table.SetHeader(ctx.tableCtx.header)
-		table.SetFooter(ctx.tableCtx.footer)
-		table.AppendBulk(ctx.tableCtx.body)
+		table.Header(ctx.tableCtx.header)
+		table.Footer(ctx.tableCtx.footer)
+		err := table.Bulk(ctx.tableCtx.body)
+		if err != nil {
+			return err
+		}
 
 		// Render the table using ASCII.
-		table.Render()
+		err = table.Render()
+		if err != nil {
+			return err
+		}
 		if err := ctx.emit(buf.String()); err != nil {
 			return err
 		}
@@ -376,7 +410,12 @@ func (ctx *textifyTraverseContext) handleTableElement(node *html.Node) error {
 		if err := ctx.traverseChildren(node); err != nil {
 			return err
 		}
+		// remove empty row
+		//if len(ctx.tableCtx.body[ctx.tableCtx.tmpRow]) == 0 {
+		//	ctx.tableCtx.body = ctx.tableCtx.body[:len(ctx.tableCtx.body)-1]
+		//} else {
 		ctx.tableCtx.tmpRow++
+		//}
 
 	case atom.Th:
 		res, err := ctx.renderEachChild(node)
