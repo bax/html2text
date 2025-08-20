@@ -3,7 +3,6 @@ package html2text
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -45,7 +44,7 @@ func TestParseUTF8(t *testing.T) {
 	}
 
 	for _, htmlFile := range htmlFiles {
-		bs, err := ioutil.ReadFile(path.Join(destPath, htmlFile.file))
+		bs, err := os.ReadFile(path.Join(destPath, htmlFile.file))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1028,6 +1027,58 @@ func Example() {
 	// ├─────────────┼─────────────┤
 	// │  FOOTER 1   │  FOOTER 2   │
 	// └─────────────┴─────────────┘
+}
+
+func TestFromStringBehaviors(t *testing.T) {
+	t.Run("strip script and style", func(t *testing.T) {
+		input := `<div>Hello<style>hidden</style><script>alert('x')</script>World</div>`
+		output := "Hello World"
+		if msg, err := wantString(input, output); err != nil {
+			t.Error(err)
+		} else if len(msg) > 0 {
+			t.Log(msg)
+		}
+	})
+
+	t.Run("link to text (url)", func(t *testing.T) {
+		input := `<p>Visit <a href="http://site">the site</a>.</p>`
+		output := "Visit the site ( http://site )."
+		if msg, err := wantString(input, output); err != nil {
+			t.Error(err)
+		} else if len(msg) > 0 {
+			t.Log(msg)
+		}
+	})
+
+	t.Run("text only option plain output", func(t *testing.T) {
+		input := `<h1>Header</h1><ul><li>item</li></ul>`
+		output := "Header.\n\nitem"
+		if msg, err := wantString(input, output, Options{TextOnly: true}); err != nil {
+			t.Error(err)
+		} else if len(msg) > 0 {
+			t.Log(msg)
+		}
+	})
+
+	t.Run("decode html entities", func(t *testing.T) {
+		input := "Fish &amp; Chips &lt;span&gt; &#169;"
+		output := "Fish & Chips <span> ©"
+		if msg, err := wantString(input, output); err != nil {
+			t.Error(err)
+		} else if len(msg) > 0 {
+			t.Log(msg)
+		}
+	})
+
+	t.Run("nested blockquotes formatting", func(t *testing.T) {
+		input := `<blockquote>top<blockquote>middle<blockquote>bottom</blockquote></blockquote></blockquote>`
+		output := "> \n> top\n>> middle\n>>> bottom\n>> \n>> \n> \n>"
+		if msg, err := wantString(input, output); err != nil {
+			t.Error(err)
+		} else if len(msg) > 0 {
+			t.Log(msg)
+		}
+	})
 }
 
 //func TestCutLastChar(t *testing.T) {
